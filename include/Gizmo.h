@@ -19,6 +19,7 @@
 #include "cinder/Matrix.h"
 #include "cinder/CinderMath.h"
 #include "cinder/Plane.h"
+#include "cinder/Arcball.h"
 
 
 namespace cinder {
@@ -87,8 +88,9 @@ namespace cinder {
         
         Vec3f       mPosition;
         Quatf       mRotations;
-        Vec3f       mRotations2;
         Vec3f       mScale;
+        
+        Arcball     mArcball;
         
         Matrix44f   mTransform;
         Matrix44f   mUnscaledTransform;

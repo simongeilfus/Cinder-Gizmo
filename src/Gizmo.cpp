@@ -26,6 +26,7 @@ namespace cinder {
         gizmo->mPosition            = Vec3f( 0.0f, 0.0f, 0.0f );
         gizmo->mRotations           = Quatf();
         gizmo->mScale               = Vec3f( 1.0f, 1.0f, 1.0f );
+        gizmo->mArcball             = Arcball( viewportSize );
         
         return gizmo;
     }
@@ -121,8 +122,10 @@ namespace cinder {
         // Create the transformation matrix, I guess some of the rotations problem are here
         // WRONG ?
         mTransform.setToIdentity();
-        mTransform.translate( mPosition );
-        mTransform *= mRotations.toMatrix44();
+       // mTransform.translate( Vec3f::zero() );
+        //mTransform *= mRotations;
+        //mTransform.translate( mPosition );
+        mTransform *= Matrix44f::createTranslation( mPosition ) * mRotations.toMatrix44();
         mUnscaledTransform = mTransform;
         mTransform.scale( mScale );
     }
@@ -160,26 +163,43 @@ namespace cinder {
     
     bool Gizmo::mouseDown( app::MouseEvent event ){
         
-        // Find the plane for the selected axis
-        Planef plane;
-        switch( mSelectedAxis ){
-            case 0: plane = Planef( Vec3f::zero(), Vec3f::yAxis() ); break;
-            case 1: plane = Planef( Vec3f::zero(), Vec3f::zAxis() ); break;
-            case 2: plane = Planef( Vec3f::zero(), Vec3f::yAxis() ); break;
+        
+        // If rotating use Arcball instead of the raycasting trick
+        if( mCurrentMode == ROTATE ){
+            switch( mSelectedAxis ){
+                case 0: mArcball.setConstraintAxis( mRotations * -Vec3f::yAxis() ); break;
+                case 1: mArcball.setConstraintAxis( mRotations * Vec3f::xAxis() ); break;
+                case 2: mArcball.setConstraintAxis( mRotations * Vec3f::zAxis() ); break;
+                default: mArcball.setNoConstraintAxis(); break;
+            }
+            mArcball.mouseDown( event.getPos() );
+        }
+        // Scale or rotate
+        else{
+            
+            // Find the plane for the selected axis
+            Planef plane;
+            switch( mSelectedAxis ){
+                case 0: plane = Planef( mPosition, Vec3f::yAxis() ); break;
+                case 1: plane = Planef( mPosition, Vec3f::zAxis() ); break;
+                case 2: plane = Planef( mPosition, Vec3f::yAxis() ); break;
+                default: return false;
+            }
+            
+            // Cast a ray from the camera
+            Ray ray = mCurrentCam.generateRay( event.getPos().x / (float) mWindowSize.getWidth(), 1.0f - event.getPos().y / (float) mWindowSize.getHeight(), mWindowSize.getWidth() / (float) mWindowSize.getHeight() );
+            
+            // And check if there's an intersection with the plane
+            float intersectionDistance;
+            bool intersect = ray.calcPlaneIntersection( plane.getPoint(), plane.getNormal(), &intersectionDistance );
+            
+            // Use it to get the mouse position in 3D
+            if( intersect ){
+                Vec3f intersection = ray.getOrigin() + ray.getDirection() * intersectionDistance;
+                mMousePos = intersection;
+            }
         }
         
-        // Cast a ray from the camera
-        Ray ray = mCurrentCam.generateRay( event.getPos().x / (float) mWindowSize.getWidth(), 1.0f - event.getPos().y / (float) mWindowSize.getHeight(), mWindowSize.getWidth() / (float) mWindowSize.getHeight() );
-        
-        // And check if there's an intersection with the plane
-        float intersectionDistance;
-        bool intersect = ray.calcPlaneIntersection( plane.getPoint(), plane.getNormal(), &intersectionDistance );
-        
-        // Use it to get the mouse position in 3D
-        if( intersect ){
-            Vec3f intersection = ray.getOrigin() + ray.getDirection() * intersectionDistance;
-            mMousePos = intersection;
-        }
         
         return false;
     }
@@ -193,48 +213,54 @@ namespace cinder {
 
     bool Gizmo::mouseDrag( app::MouseEvent event ){           
         
-        // Find the plane and the current axis
-        Vec3f currentAxis;
-        Planef currentPlane;
-        switch( mSelectedAxis ){
-            case 0: currentAxis = Vec3f::xAxis(); currentPlane = Planef( Vec3f::zero(), Vec3f::yAxis() ); break;
-            case 1: currentAxis = Vec3f::yAxis(); currentPlane = Planef( Vec3f::zero(), Vec3f::zAxis() ); break;
-            case 2: currentAxis = Vec3f::zAxis(); currentPlane = Planef( Vec3f::zero(), Vec3f::yAxis() ); break;
-            default: return false;
+        // If rotating use Arcball instead of the raycasting trick
+        if( mCurrentMode == ROTATE ){
+            mArcball.mouseDrag( event.getPos() );
+            mRotations = mArcball.getQuat();
+            transform();
         }
         
-        // Cast a ray from the camera
-        float intersectionDistance;
-        Ray ray = mCurrentCam.generateRay( event.getPos().x / (float) mWindowSize.getWidth(), 1.0f - event.getPos().y / (float) mWindowSize.getHeight(), mWindowSize.getWidth() / (float) mWindowSize.getHeight() );
-        bool intersect = ray.calcPlaneIntersection( currentPlane.getPoint(), currentPlane.getNormal(), &intersectionDistance );
-        
-        // And check if there's an intersection with the plane
-        if( intersect ){
+        // Scale or rotate
+        else{
             
-            // Use that to move, rotate or scale 
-            Vec3f intersection = ray.getOrigin() + ray.getDirection() * intersectionDistance;
-            Vec3f diff = ( intersection - mMousePos );
-            if( diff.length() < 50.0f ){ 
-                diff *= currentAxis;
-                
-                if( mCurrentMode == TRANSLATE ){   
-                    mPosition += diff;
-                }
-                else if( mCurrentMode == ROTATE ){
-                    diff *= 0.005f;
-                    mRotations *= Quatf( currentAxis, diff.x + diff.y + diff.z ) ;
-                }
-                else if( mCurrentMode == SCALE ){
-                    mScale += diff * 0.01f;
-                }
-                
-                transform();
+            // Find the plane and the current axis
+            Vec3f currentAxis;
+            Planef currentPlane;
+            switch( mSelectedAxis ){
+                case 0: currentAxis = Vec3f::xAxis(); currentPlane = Planef( Vec3f::zero(), Vec3f::yAxis() ); break;
+                case 1: currentAxis = Vec3f::yAxis(); currentPlane = Planef( Vec3f::zero(), Vec3f::zAxis() ); break;
+                case 2: currentAxis = Vec3f::zAxis(); currentPlane = Planef( Vec3f::zero(), Vec3f::yAxis() ); break;
+                default: return false;
             }
             
-            // Keep the last mouse position
-            mMousePos = intersection;
+            // Cast a ray from the camera
+            float intersectionDistance;
+            Ray ray = mCurrentCam.generateRay( event.getPos().x / (float) mWindowSize.getWidth(), 1.0f - event.getPos().y / (float) mWindowSize.getHeight(), mWindowSize.getWidth() / (float) mWindowSize.getHeight() );
+            bool intersect = ray.calcPlaneIntersection( currentPlane.getPoint(), currentPlane.getNormal(), &intersectionDistance );
+            
+            // And check if there's an intersection with the plane
+            if( intersect ){
+                
+                // Use that to move, rotate or scale 
+                Vec3f intersection = ray.getOrigin() + ray.getDirection() * intersectionDistance;
+                Vec3f diff = ( intersection - mMousePos );
+                if( diff.length() < 50.0f ){ 
+                    diff *= currentAxis;
+                    
+                    if( mCurrentMode == TRANSLATE ){   
+                        mPosition += diff;
+                    }
+                    else if( mCurrentMode == SCALE ){
+                        mScale += diff * 0.01f;
+                    }
+                    
+                    transform();
+                }
+                
+                // Keep the last mouse position
+                mMousePos = intersection;
+            }            
         }
-        
         
         return false;  
     }
@@ -263,10 +289,10 @@ namespace cinder {
         glEnable( GL_CULL_FACE );
         glCullFace( GL_BACK );
         
-        gl::color( yColor );
+        gl::color( xColor );
         gl::drawCylinder( axisLength, axisLength, radius, slices );
         
-        gl::color( xColor );
+        gl::color( yColor );
         gl::pushModelView();
         gl::rotate( Vec3f::zAxis() * 90 );
         gl::drawCylinder( axisLength, axisLength, radius, slices );

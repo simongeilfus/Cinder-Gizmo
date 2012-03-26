@@ -15,7 +15,7 @@
 		00B784B60FF439BC000DE1D7 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B20FF439BC000DE1D7 /* CoreAudio.framework */; };
 		00BAE65A0E7ED9C10018A608 /* GizmoSampleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00BAE6590E7ED9C10018A608 /* GizmoSampleApp.cpp */; };
 		00CCAF15116A9FEE008396D5 /* CinderApp.icns in Resources */ = {isa = PBXBuildFile; fileRef = 00CCAF14116A9FEE008396D5 /* CinderApp.icns */; };
-		4B08FAAE151FCAB100B303C2 /* Gizmo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08FAAD151FCAB100B303C2 /* Gizmo.cpp */; };
+		4B089D691521241700BB1AC4 /* Gizmo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B089D671521241700BB1AC4 /* Gizmo.cpp */; };
 		5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		5323E6B60EAFCA7E003A9687 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B50EAFCA7E003A9687 /* QTKit.framework */; };
 		53E3CDFC0E86099300238D2B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53E3CDFB0E86099300238D2B /* Carbon.framework */; };
@@ -36,8 +36,8 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* GizmoSample_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GizmoSample_Prefix.pch; sourceTree = "<group>"; };
-		4B08FAAB151FCAB100B303C2 /* Gizmo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gizmo.h; sourceTree = "<group>"; };
-		4B08FAAD151FCAB100B303C2 /* Gizmo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Gizmo.cpp; sourceTree = "<group>"; };
+		4B089D671521241700BB1AC4 /* Gizmo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Gizmo.cpp; sourceTree = "<group>"; };
+		4B089D681521241700BB1AC4 /* Gizmo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gizmo.h; sourceTree = "<group>"; };
 		5323E6B10EAFCA74003A9687 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
 		5323E6B50EAFCA7E003A9687 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		53E3CDFB0E86099300238D2B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
@@ -148,6 +148,16 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		4B089D661521241700BB1AC4 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				4B089D671521241700BB1AC4 /* Gizmo.cpp */,
+				4B089D681521241700BB1AC4 /* Gizmo.h */,
+			);
+			name = src;
+			path = ../../../src;
+			sourceTree = "<group>";
+		};
 		4B08FAA8151FCAA200B303C2 /* Blocks */ = {
 			isa = PBXGroup;
 			children = (
@@ -159,28 +169,9 @@
 		4B08FAA9151FCAA800B303C2 /* Gizmo */ = {
 			isa = PBXGroup;
 			children = (
-				4B08FAAA151FCAB100B303C2 /* include */,
-				4B08FAAC151FCAB100B303C2 /* src */,
+				4B089D661521241700BB1AC4 /* src */,
 			);
 			name = Gizmo;
-			sourceTree = "<group>";
-		};
-		4B08FAAA151FCAB100B303C2 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				4B08FAAB151FCAB100B303C2 /* Gizmo.h */,
-			);
-			name = include;
-			path = ../../../include;
-			sourceTree = "<group>";
-		};
-		4B08FAAC151FCAB100B303C2 /* src */ = {
-			isa = PBXGroup;
-			children = (
-				4B08FAAD151FCAB100B303C2 /* Gizmo.cpp */,
-			);
-			name = src;
-			path = ../../../src;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -245,7 +236,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				00BAE65A0E7ED9C10018A608 /* GizmoSampleApp.cpp in Sources */,
-				4B08FAAE151FCAB100B303C2 /* Gizmo.cpp in Sources */,
+				4B089D691521241700BB1AC4 /* Gizmo.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

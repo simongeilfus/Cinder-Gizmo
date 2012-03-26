@@ -29,7 +29,7 @@ typedef std::shared_ptr< class Gizmo > GizmoRef;
 class Gizmo {
 public:
     
-    static GizmoRef Create( Vec2i viewportSize );
+    static GizmoRef Create( ci::Vec2i viewportSize );
     
     enum {
         TRANSLATE,
@@ -37,39 +37,39 @@ public:
         SCALE
     };
     
-    void setMatrices( CameraPersp cam );
+    void setMatrices( ci::CameraPersp cam );
     
     void draw();
     
-    void setTranslate( Vec3f v );
-    void setRotate( Quatf q );
-    void setScale( Vec3f v );
-    void setTransform( Vec3f position, Quatf rotations, Vec3f scale );
-    void setTransform( Matrix44f m );
+    void setTranslate( ci::Vec3f v );
+    void setRotate( ci::Quatf q );
+    void setScale( ci::Vec3f v );
+    void setTransform( ci::Vec3f position, ci::Quatf rotations, ci::Vec3f scale );
+    void setTransform( ci::Matrix44f m );
     
-    Vec3f       getTranslate(){ return mPosition; }
-    Quatf       getRotate(){ return mRotations; }
-    Vec3f       getScale(){ return mScale; }
-    Matrix44f   getTransform();
+    ci::Vec3f       getTranslate(){ return mPosition; }
+    ci::Quatf       getRotate(){ return mRotations; }
+    ci::Vec3f       getScale(){ return mScale; }
+    ci::Matrix44f   getTransform();
     
     void setMode( int mode );
     
     void registerEvents();
     void unregisterEvents();
     
-    bool mouseDown( app::MouseEvent event );
-    bool mouseUp( app::MouseEvent event );
-    bool mouseMove( app::MouseEvent event );
-    bool mouseDrag( app::MouseEvent event );
+    bool mouseDown( ci::app::MouseEvent event );
+    bool mouseUp( ci::app::MouseEvent event );
+    bool mouseMove( ci::app::MouseEvent event );
+    bool mouseDrag( ci::app::MouseEvent event );
     
     
 protected:
     
     Gizmo();
     
-    void drawTranslate( ColorA xColor = RED, ColorA yColor = GREEN, ColorA zColor = BLUE ) ;
-    void drawRotate( ColorA xColor = RED, ColorA yColor = GREEN, ColorA zColor = BLUE );
-    void drawScale( ColorA xColor = RED, ColorA yColor = GREEN, ColorA zColor = BLUE );
+    void drawTranslate( ci::ColorA xColor = RED, ci::ColorA yColor = GREEN, ci::ColorA zColor = BLUE ) ;
+    void drawRotate( ci::ColorA xColor = RED, ci::ColorA yColor = GREEN, ci::ColorA zColor = BLUE );
+    void drawScale( ci::ColorA xColor = RED, ci::ColorA yColor = GREEN, ci::ColorA zColor = BLUE );
     
     int samplePosition( int x, int y ); 
     
@@ -80,30 +80,30 @@ protected:
     void transform();
     
     
-    static ColorA RED, GREEN, BLUE, YELLOW;
+    static ci::ColorA RED, GREEN, BLUE, YELLOW;
     
     
-    gl::Fbo     mPositionFbo;
-    gl::Fbo     mCursorFbo;
+    ci::gl::Fbo     mPositionFbo;
+    ci::gl::Fbo     mCursorFbo;
     
-    Vec3f       mPosition;
-    Quatf       mRotations;
-    Vec3f       mScale;
+    ci::Vec3f       mPosition;
+    ci::Quatf       mRotations;
+    ci::Vec3f       mScale;
     
-    Arcball     mArcball;
+    ci::Arcball     mArcball;
     
-    Matrix44f   mTransform;
-    Matrix44f   mUnscaledTransform;
+    ci::Matrix44f   mTransform;
+    ci::Matrix44f   mUnscaledTransform;
     
-    CameraPersp mCurrentCam;
-    Matrix44f   mModelView;
-    Matrix44f   mProjection;
-    Rectf       mWindowSize;
-    Area        mViewport;
+    ci::CameraPersp mCurrentCam;
+    ci::Matrix44f   mModelView;
+    ci::Matrix44f   mProjection;
+    ci::Rectf       mWindowSize;
+    ci::Area        mViewport;
     
-    int         mCurrentMode;
-    int         mSelectedAxis;
-    Vec3f       mMousePos;
+    int             mCurrentMode;
+    int             mSelectedAxis;
+    ci::Vec3f       mMousePos;
     
     std::vector< ci::CallbackId >	mCallbackIds;
     

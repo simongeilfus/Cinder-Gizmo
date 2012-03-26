@@ -10,29 +10,29 @@
 
 
 
-GizmoRef Gizmo::Create( Vec2i viewportSize ){
+GizmoRef Gizmo::Create( ci::Vec2i viewportSize ){
     GizmoRef gizmo              = GizmoRef( new Gizmo() );
     gizmo->mCurrentMode         = TRANSLATE;
-    gizmo->mWindowSize          = Rectf( 0, 0, viewportSize.x, viewportSize.y );;
+    gizmo->mWindowSize          = ci::Rectf( 0, 0, viewportSize.x, viewportSize.y );;
     
-    gl::Fbo::Format format;
+    ci::gl::Fbo::Format format;
     format.enableColorBuffer();
     format.setColorInternalFormat( GL_RGBA );
     format.setSamples( 0 );
     
-    gizmo->mPositionFbo         = gl::Fbo( viewportSize.x / 2.0f, viewportSize.y / 2.0f, format );
-    gizmo->mCursorFbo           = gl::Fbo( 10, 10, format );
+    gizmo->mPositionFbo         = ci::gl::Fbo( viewportSize.x / 2.0f, viewportSize.y / 2.0f, format );
+    gizmo->mCursorFbo           = ci::gl::Fbo( 10, 10, format );
     gizmo->mSelectedAxis        = -1;
-    gizmo->mPosition            = Vec3f( 0.0f, 0.0f, 0.0f );
-    gizmo->mRotations           = Quatf();
-    gizmo->mScale               = Vec3f( 1.0f, 1.0f, 1.0f );
-    gizmo->mArcball             = Arcball( viewportSize );
+    gizmo->mPosition            = ci::Vec3f( 0.0f, 0.0f, 0.0f );
+    gizmo->mRotations           = ci::Quatf();
+    gizmo->mScale               = ci::Vec3f( 1.0f, 1.0f, 1.0f );
+    gizmo->mArcball             = ci::Arcball( viewportSize );
     
     return gizmo;
 }
 
 
-void Gizmo::setMatrices( CameraPersp cam ){
+void Gizmo::setMatrices( ci::CameraPersp cam ){
     
     mCurrentCam = cam;
     mProjection = cam.getProjectionMatrix();
@@ -41,27 +41,27 @@ void Gizmo::setMatrices( CameraPersp cam ){
     // Render Gizmo to the position Fbo
     mPositionFbo.bindFramebuffer();
     
-    gl::setMatricesWindowPersp( mPositionFbo.getSize() );
+    ci::gl::setMatricesWindowPersp( mPositionFbo.getSize() );
     
     glMatrixMode( GL_PROJECTION );
     glLoadMatrixf( mProjection.m );
     
-    gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ) );
+    ci::gl::clear( ci::ColorA( 0.0f, 0.0f, 0.0f, 0.0f ) );
     
-    gl::pushModelView();
+    ci::gl::pushModelView();
     
     glMatrixMode( GL_MODELVIEW );
     glLoadMatrixf( mModelView.m );
     
     // Mult by the unscaled matrix so we don't get non-uniform scales on our graphics
-    gl::multModelView( mUnscaledTransform );
+    ci::gl::multModelView( mUnscaledTransform );
     
-    gl::enableDepthRead();
-    gl::enableDepthWrite();
+    ci::gl::enableDepthRead();
+    ci::gl::enableDepthWrite();
     
     // Scale the graphics so they look always the same size on the screen
     float scale = ( mTransform.getTranslate() - mCurrentCam.getEyePoint() ).length() / 200.0f;
-    gl::scale( scale, scale, scale );
+    ci::gl::scale( scale, scale, scale );
     
     // Draw Gizmo graphics
     switch( mCurrentMode ){
@@ -70,22 +70,22 @@ void Gizmo::setMatrices( CameraPersp cam ){
         case SCALE: drawScale(); break;
     }
     
-    gl::disableDepthRead();
-    gl::disableDepthWrite();
+    ci::gl::disableDepthRead();
+    ci::gl::disableDepthWrite();
     
-    gl::popModelView();
+    ci::gl::popModelView();
     mPositionFbo.unbindFramebuffer();
 }
 
 void Gizmo::draw(){
-    gl::pushModelView();
+    ci::gl::pushModelView();
     
     // Mult by the unscaled matrix so we don't get non-uniform scales on our graphics
-    gl::multModelView( mUnscaledTransform );
+    ci::gl::multModelView( mUnscaledTransform );
     
     // Scale the graphics so they look always the same size on the screen
     float scale = ( mTransform.getTranslate() - mCurrentCam.getEyePoint() ).length() / 200.0f;
-    gl::scale( scale, scale, scale );
+    ci::gl::scale( scale, scale, scale );
     
     // Draw Gizmo graphics and highlight selected axis
     switch( mCurrentMode ){
@@ -114,31 +114,31 @@ void Gizmo::draw(){
             break;
     }
     
-    gl::drawCoordinateFrame();
-    gl::popModelView();
+    ci::gl::drawCoordinateFrame();
+    ci::gl::popModelView();
 }
 
 void Gizmo::transform(){
     // Create the transformation matrix, I guess some of the rotations problem are here
     // WRONG ?
     mTransform.setToIdentity();
-    // mTransform.translate( Vec3f::zero() );
+    // mTransform.translate( ci::Vec3f::zero() );
     //mTransform *= mRotations;
     //mTransform.translate( mPosition );
-    mTransform *= Matrix44f::createTranslation( mPosition ) * mRotations.toMatrix44();
+    mTransform *= ci::Matrix44f::createTranslation( mPosition ) * mRotations.toMatrix44();
     mUnscaledTransform = mTransform;
     mTransform.scale( mScale );
 }
-void Gizmo::setTransform( Vec3f position, Quatf rotations, Vec3f scale ){
+void Gizmo::setTransform( ci::Vec3f position, ci::Quatf rotations, ci::Vec3f scale ){
     mPosition   = position;
     mRotations  = rotations;
     mScale      = scale;
     transform();
 }
-void Gizmo::setTransform( Matrix44f m ){
+void Gizmo::setTransform( ci::Matrix44f m ){
     mTransform = m;
 }
-Matrix44f Gizmo::getTransform(){
+ci::Matrix44f Gizmo::getTransform(){
     return mTransform;
 }
 void Gizmo::setMode( int mode ){
@@ -147,29 +147,29 @@ void Gizmo::setMode( int mode ){
 
 
 void Gizmo::registerEvents(){
-    mCallbackIds.push_back( app::App::get()->registerMouseDown( this, &Gizmo::mouseDown ) );
-    mCallbackIds.push_back( app::App::get()->registerMouseUp( this, &Gizmo::mouseUp ) );
-    mCallbackIds.push_back( app::App::get()->registerMouseMove( this, &Gizmo::mouseMove ) );
-    mCallbackIds.push_back( app::App::get()->registerMouseDrag( this, &Gizmo::mouseDrag ) );
+    mCallbackIds.push_back( ci::app::App::get()->registerMouseDown( this, &Gizmo::mouseDown ) );
+    mCallbackIds.push_back( ci::app::App::get()->registerMouseUp( this, &Gizmo::mouseUp ) );
+    mCallbackIds.push_back( ci::app::App::get()->registerMouseMove( this, &Gizmo::mouseMove ) );
+    mCallbackIds.push_back( ci::app::App::get()->registerMouseDrag( this, &Gizmo::mouseDrag ) );
 }
 void Gizmo::unregisterEvents(){
     if( mCallbackIds.size() ){
-        app::App::get()->unregisterMouseDown(	mCallbackIds[ 0 ] );
-        app::App::get()->unregisterMouseUp(     mCallbackIds[ 1 ] );
-        app::App::get()->unregisterMouseMove(	mCallbackIds[ 2 ] );
-        app::App::get()->unregisterMouseDrag(	mCallbackIds[ 3 ] );
+        ci::app::App::get()->unregisterMouseDown(	mCallbackIds[ 0 ] );
+        ci::app::App::get()->unregisterMouseUp(     mCallbackIds[ 1 ] );
+        ci::app::App::get()->unregisterMouseMove(	mCallbackIds[ 2 ] );
+        ci::app::App::get()->unregisterMouseDrag(	mCallbackIds[ 3 ] );
     }
 }
 
-bool Gizmo::mouseDown( app::MouseEvent event ){
+bool Gizmo::mouseDown( ci::app::MouseEvent event ){
     
     
     // If rotating use Arcball instead of the raycasting trick
     if( mCurrentMode == ROTATE ){
         switch( mSelectedAxis ){
-            case 0: mArcball.setConstraintAxis( mRotations * -Vec3f::yAxis() ); break;
-            case 1: mArcball.setConstraintAxis( mRotations * Vec3f::xAxis() ); break;
-            case 2: mArcball.setConstraintAxis( mRotations * Vec3f::zAxis() ); break;
+            case 0: mArcball.setConstraintAxis( mRotations * -ci::Vec3f::yAxis() ); break;
+            case 1: mArcball.setConstraintAxis( mRotations * ci::Vec3f::xAxis() ); break;
+            case 2: mArcball.setConstraintAxis( mRotations * ci::Vec3f::zAxis() ); break;
             default: mArcball.setNoConstraintAxis(); break;
         }
         mArcball.mouseDown( event.getPos() );
@@ -178,16 +178,16 @@ bool Gizmo::mouseDown( app::MouseEvent event ){
     else{
         
         // Find the plane for the selected axis
-        Planef plane;
+        ci::Planef plane;
         switch( mSelectedAxis ){
-            case 0: plane = Planef( mPosition, Vec3f::yAxis() ); break;
-            case 1: plane = Planef( mPosition, Vec3f::zAxis() ); break;
-            case 2: plane = Planef( mPosition, Vec3f::yAxis() ); break;
+            case 0: plane = ci::Planef( mPosition, ci::Vec3f::yAxis() ); break;
+            case 1: plane = ci::Planef( mPosition, ci::Vec3f::zAxis() ); break;
+            case 2: plane = ci::Planef( mPosition, ci::Vec3f::yAxis() ); break;
             default: return false;
         }
         
         // Cast a ray from the camera
-        Ray ray = mCurrentCam.generateRay( event.getPos().x / (float) mWindowSize.getWidth(), 1.0f - event.getPos().y / (float) mWindowSize.getHeight(), mWindowSize.getWidth() / (float) mWindowSize.getHeight() );
+        ci::Ray ray = mCurrentCam.generateRay( event.getPos().x / (float) mWindowSize.getWidth(), 1.0f - event.getPos().y / (float) mWindowSize.getHeight(), mWindowSize.getWidth() / (float) mWindowSize.getHeight() );
         
         // And check if there's an intersection with the plane
         float intersectionDistance;
@@ -195,7 +195,7 @@ bool Gizmo::mouseDown( app::MouseEvent event ){
         
         // Use it to get the mouse position in 3D
         if( intersect ){
-            Vec3f intersection = ray.getOrigin() + ray.getDirection() * intersectionDistance;
+            ci::Vec3f intersection = ray.getOrigin() + ray.getDirection() * intersectionDistance;
             mMousePos = intersection;
         }
     }
@@ -203,15 +203,15 @@ bool Gizmo::mouseDown( app::MouseEvent event ){
     
     return false;
 }
-bool Gizmo::mouseUp( app::MouseEvent event ){
+bool Gizmo::mouseUp( ci::app::MouseEvent event ){
     return false;
 }
-bool Gizmo::mouseMove( app::MouseEvent event ){
-    mSelectedAxis = samplePosition( (float) event.getPos().x / (float) app::getWindowWidth() * (float) mPositionFbo.getWidth(), (float) event.getPos().y  / (float) app::getWindowHeight() * (float) mPositionFbo.getHeight() );
+bool Gizmo::mouseMove( ci::app::MouseEvent event ){
+    mSelectedAxis = samplePosition( (float) event.getPos().x / (float) ci::app::getWindowWidth() * (float) mPositionFbo.getWidth(), (float) event.getPos().y  / (float) ci::app::getWindowHeight() * (float) mPositionFbo.getHeight() );
     return false;
 }
 
-bool Gizmo::mouseDrag( app::MouseEvent event ){           
+bool Gizmo::mouseDrag( ci::app::MouseEvent event ){           
     
     // If rotating use Arcball instead of the raycasting trick
     if( mCurrentMode == ROTATE ){
@@ -224,26 +224,26 @@ bool Gizmo::mouseDrag( app::MouseEvent event ){
     else{
         
         // Find the plane and the current axis
-        Vec3f currentAxis;
-        Planef currentPlane;
+        ci::Vec3f currentAxis;
+        ci::Planef currentPlane;
         switch( mSelectedAxis ){
-            case 0: currentAxis = Vec3f::xAxis(); currentPlane = Planef( Vec3f::zero(), Vec3f::yAxis() ); break;
-            case 1: currentAxis = Vec3f::yAxis(); currentPlane = Planef( Vec3f::zero(), Vec3f::zAxis() ); break;
-            case 2: currentAxis = Vec3f::zAxis(); currentPlane = Planef( Vec3f::zero(), Vec3f::yAxis() ); break;
+            case 0: currentAxis = ci::Vec3f::xAxis(); currentPlane = ci::Planef( ci::Vec3f::zero(), ci::Vec3f::yAxis() ); break;
+            case 1: currentAxis = ci::Vec3f::yAxis(); currentPlane = ci::Planef( ci::Vec3f::zero(), ci::Vec3f::zAxis() ); break;
+            case 2: currentAxis = ci::Vec3f::zAxis(); currentPlane = ci::Planef( ci::Vec3f::zero(), ci::Vec3f::yAxis() ); break;
             default: return false;
         }
         
         // Cast a ray from the camera
         float intersectionDistance;
-        Ray ray = mCurrentCam.generateRay( event.getPos().x / (float) mWindowSize.getWidth(), 1.0f - event.getPos().y / (float) mWindowSize.getHeight(), mWindowSize.getWidth() / (float) mWindowSize.getHeight() );
+        ci::Ray ray = mCurrentCam.generateRay( event.getPos().x / (float) mWindowSize.getWidth(), 1.0f - event.getPos().y / (float) mWindowSize.getHeight(), mWindowSize.getWidth() / (float) mWindowSize.getHeight() );
         bool intersect = ray.calcPlaneIntersection( currentPlane.getPoint(), currentPlane.getNormal(), &intersectionDistance );
         
         // And check if there's an intersection with the plane
         if( intersect ){
             
             // Use that to move, rotate or scale 
-            Vec3f intersection = ray.getOrigin() + ray.getDirection() * intersectionDistance;
-            Vec3f diff = ( intersection - mMousePos );
+            ci::Vec3f intersection = ray.getOrigin() + ray.getDirection() * intersectionDistance;
+            ci::Vec3f diff = ( intersection - mMousePos );
             if( diff.length() < 50.0f ){ 
                 diff *= currentAxis;
                 
@@ -269,19 +269,19 @@ bool Gizmo::mouseDrag( app::MouseEvent event ){
 Gizmo::Gizmo(){
 }
 
-void Gizmo::drawTranslate( ColorA xColor, ColorA yColor, ColorA zColor ) {
+void Gizmo::drawTranslate( ci::ColorA xColor, ci::ColorA yColor, ci::ColorA zColor ) {
     float axisLength = 30.0f;
     float headLength = 6.0f; 
     float headRadius = 1.5f;
     
-    gl::color( xColor );
-    gl::drawVector( Vec3f::zero(), Vec3f::xAxis() * axisLength, headLength, headRadius );
-    gl::color( yColor );
-    gl::drawVector( Vec3f::zero(), Vec3f::yAxis() * axisLength, headLength, headRadius );
-    gl::color( zColor );
-    gl::drawVector( Vec3f::zero(), Vec3f::zAxis() * axisLength, headLength, headRadius );
+    ci::gl::color( xColor );
+    ci::gl::drawVector( ci::Vec3f::zero(), ci::Vec3f::xAxis() * axisLength, headLength, headRadius );
+    ci::gl::color( yColor );
+    ci::gl::drawVector( ci::Vec3f::zero(), ci::Vec3f::yAxis() * axisLength, headLength, headRadius );
+    ci::gl::color( zColor );
+    ci::gl::drawVector( ci::Vec3f::zero(), ci::Vec3f::zAxis() * axisLength, headLength, headRadius );
 }
-void Gizmo::drawRotate( ColorA xColor, ColorA yColor, ColorA zColor ){
+void Gizmo::drawRotate( ci::ColorA xColor, ci::ColorA yColor, ci::ColorA zColor ){
     float axisLength = 30.0f;
     float radius = 2.0f; 
     float slices = 30;
@@ -289,37 +289,37 @@ void Gizmo::drawRotate( ColorA xColor, ColorA yColor, ColorA zColor ){
     glEnable( GL_CULL_FACE );
     glCullFace( GL_BACK );
     
-    gl::color( xColor );
-    gl::drawCylinder( axisLength, axisLength, radius, slices );
+    ci::gl::color( xColor );
+    ci::gl::drawCylinder( axisLength, axisLength, radius, slices );
     
-    gl::color( yColor );
-    gl::pushModelView();
-    gl::rotate( Vec3f::zAxis() * 90 );
-    gl::drawCylinder( axisLength, axisLength, radius, slices );
-    gl::popModelView();
+    ci::gl::color( yColor );
+    ci::gl::pushModelView();
+    ci::gl::rotate( ci::Vec3f::zAxis() * 90 );
+    ci::gl::drawCylinder( axisLength, axisLength, radius, slices );
+    ci::gl::popModelView();
     
-    gl::color( zColor );
-    gl::pushModelView();
-    gl::rotate( Vec3f::xAxis() * 90 );
-    gl::drawCylinder( axisLength, axisLength, radius, slices );
-    gl::popModelView();
+    ci::gl::color( zColor );
+    ci::gl::pushModelView();
+    ci::gl::rotate( ci::Vec3f::xAxis() * 90 );
+    ci::gl::drawCylinder( axisLength, axisLength, radius, slices );
+    ci::gl::popModelView();
     
     glDisable( GL_CULL_FACE );
     
 }
-void Gizmo::drawScale( ColorA xColor, ColorA yColor, ColorA zColor ){
+void Gizmo::drawScale( ci::ColorA xColor, ci::ColorA yColor, ci::ColorA zColor ){
     float axisLength = 30.0f;
-    Vec3f handleSize = Vec3f( 3.0f, 3.0f, 3.0f );
+    ci::Vec3f handleSize = ci::Vec3f( 3.0f, 3.0f, 3.0f );
     
-    gl::color( xColor );
-    gl::drawLine( Vec3f::zero(), Vec3f::xAxis() * axisLength );
-    gl::drawCube( Vec3f::xAxis() * axisLength, handleSize );
-    gl::color( yColor );
-    gl::drawLine( Vec3f::zero(), Vec3f::yAxis() * axisLength );
-    gl::drawCube( Vec3f::yAxis() * axisLength, handleSize );
-    gl::color( zColor );
-    gl::drawLine( Vec3f::zero(), Vec3f::zAxis() * axisLength );
-    gl::drawCube( Vec3f::zAxis() * axisLength, handleSize ); 
+    ci::gl::color( xColor );
+    ci::gl::drawLine( ci::Vec3f::zero(), ci::Vec3f::xAxis() * axisLength );
+    ci::gl::drawCube( ci::Vec3f::xAxis() * axisLength, handleSize );
+    ci::gl::color( yColor );
+    ci::gl::drawLine( ci::Vec3f::zero(), ci::Vec3f::yAxis() * axisLength );
+    ci::gl::drawCube( ci::Vec3f::yAxis() * axisLength, handleSize );
+    ci::gl::color( zColor );
+    ci::gl::drawLine( ci::Vec3f::zero(), ci::Vec3f::zAxis() * axisLength );
+    ci::gl::drawCube( ci::Vec3f::zAxis() * axisLength, handleSize ); 
 }
 
 
@@ -329,7 +329,7 @@ int Gizmo::samplePosition( int x, int y ){
     
     // Copy Cursor Neighbors to the cursor Fbo
     
-    mPositionFbo.blitTo( mCursorFbo, Area( x-5, y-5, x+5, y+5), mCursorFbo.getBounds());
+    mPositionFbo.blitTo( mCursorFbo, ci::Area( x-5, y-5, x+5, y+5), mCursorFbo.getBounds());
     
     mCursorFbo.bindFramebuffer();
     
@@ -367,7 +367,7 @@ int Gizmo::samplePosition( int x, int y ){
 }
 
 
-ColorA Gizmo::RED = ColorA( 1.0f, 0.0f, 0.0f, 1.0f);
-ColorA Gizmo::GREEN = ColorA( 0.0f, 1.0f, 0.0f, 1.0f);
-ColorA Gizmo::BLUE = ColorA( 0.0f, 0.0f, 1.0f, 1.0f);
-ColorA Gizmo::YELLOW = ColorA( 1.0f, 1.0f, 0.0f, 1.0f);
+ci::ColorA Gizmo::RED = ci::ColorA( 1.0f, 0.0f, 0.0f, 1.0f);
+ci::ColorA Gizmo::GREEN = ci::ColorA( 0.0f, 1.0f, 0.0f, 1.0f);
+ci::ColorA Gizmo::BLUE = ci::ColorA( 0.0f, 0.0f, 1.0f, 1.0f);
+ci::ColorA Gizmo::YELLOW = ci::ColorA( 1.0f, 1.0f, 0.0f, 1.0f);

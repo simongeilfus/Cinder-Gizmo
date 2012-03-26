@@ -38,7 +38,6 @@ namespace cinder {
         mModelView  = cam.getModelViewMatrix();
         
         // Render Gizmo to the position Fbo
-        //-----------------------------------------------------------
         mPositionFbo.bindFramebuffer();
         
         gl::setMatricesWindowPersp( mPositionFbo.getSize() );
@@ -53,22 +52,22 @@ namespace cinder {
         glMatrixMode( GL_MODELVIEW );
         glLoadMatrixf( mModelView.m );
         
+        // Mult by the unscaled matrix so we don't get non-uniform scales on our graphics
         gl::multModelView( mUnscaledTransform );
         
         gl::enableDepthRead();
         gl::enableDepthWrite();
         
+        // Scale the graphics so they look always the same size on the screen
         float scale = ( mTransform.getTranslate() - mCurrentCam.getEyePoint() ).length() / 200.0f;
-        gl::pushMatrices();
         gl::scale( scale, scale, scale );
-
+        
+        // Draw Gizmo graphics
         switch( mCurrentMode ){
             case TRANSLATE: drawTranslate(); break;
             case ROTATE: drawRotate(); break;
             case SCALE: drawScale(); break;
         }
-        
-        gl::popMatrices();
         
         gl::disableDepthRead();
         gl::disableDepthWrite();
@@ -79,10 +78,15 @@ namespace cinder {
     
     void Gizmo::draw(){
         gl::pushModelView();
+        
+        // Mult by the unscaled matrix so we don't get non-uniform scales on our graphics
         gl::multModelView( mUnscaledTransform );
         
+        // Scale the graphics so they look always the same size on the screen
         float scale = ( mTransform.getTranslate() - mCurrentCam.getEyePoint() ).length() / 200.0f;
         gl::scale( scale, scale, scale );
+        
+        // Draw Gizmo graphics and highlight selected axis
         switch( mCurrentMode ){
             case TRANSLATE: 
                 switch( mSelectedAxis ){
@@ -114,6 +118,8 @@ namespace cinder {
     }
     
     void Gizmo::transform(){
+        // Create the transformation matrix, I guess some of the rotations problem are here
+        // WRONG ?
         mTransform.setToIdentity();
         mTransform.translate( mPosition );
         mTransform *= mRotations.toMatrix44();
@@ -153,6 +159,8 @@ namespace cinder {
     }
     
     bool Gizmo::mouseDown( app::MouseEvent event ){
+        
+        // Find the plane for the selected axis
         Planef plane;
         switch( mSelectedAxis ){
             case 0: plane = Planef( Vec3f::zero(), Vec3f::yAxis() ); break;
@@ -160,11 +168,14 @@ namespace cinder {
             case 2: plane = Planef( Vec3f::zero(), Vec3f::yAxis() ); break;
         }
         
+        // Cast a ray from the camera
         Ray ray = mCurrentCam.generateRay( event.getPos().x / (float) mWindowSize.getWidth(), 1.0f - event.getPos().y / (float) mWindowSize.getHeight(), mWindowSize.getWidth() / (float) mWindowSize.getHeight() );
         
+        // And check if there's an intersection with the plane
         float intersectionDistance;
         bool intersect = ray.calcPlaneIntersection( plane.getPoint(), plane.getNormal(), &intersectionDistance );
         
+        // Use it to get the mouse position in 3D
         if( intersect ){
             Vec3f intersection = ray.getOrigin() + ray.getDirection() * intersectionDistance;
             mMousePos = intersection;
@@ -182,6 +193,7 @@ namespace cinder {
 
     bool Gizmo::mouseDrag( app::MouseEvent event ){           
         
+        // Find the plane and the current axis
         Vec3f currentAxis;
         Planef currentPlane;
         switch( mSelectedAxis ){
@@ -191,10 +203,15 @@ namespace cinder {
             default: return false;
         }
         
+        // Cast a ray from the camera
         float intersectionDistance;
         Ray ray = mCurrentCam.generateRay( event.getPos().x / (float) mWindowSize.getWidth(), 1.0f - event.getPos().y / (float) mWindowSize.getHeight(), mWindowSize.getWidth() / (float) mWindowSize.getHeight() );
         bool intersect = ray.calcPlaneIntersection( currentPlane.getPoint(), currentPlane.getNormal(), &intersectionDistance );
+        
+        // And check if there's an intersection with the plane
         if( intersect ){
+            
+            // Use that to move, rotate or scale 
             Vec3f intersection = ray.getOrigin() + ray.getDirection() * intersectionDistance;
             Vec3f diff = ( intersection - mMousePos );
             if( diff.length() < 50.0f ){ 
@@ -205,12 +222,7 @@ namespace cinder {
                 }
                 else if( mCurrentMode == ROTATE ){
                     diff *= 0.005f;
-                    //float save = diff.x;
-                    diff.x = -diff.x;
-                    diff.y = -diff.y;
-                    //mRotations2 += diff;//Quatf( mRotations.getPitch() + diff.x, mRotations.getYaw() + diff.y, mRotations.getRoll() + diff.z );
-                    mRotations *= Quatf( currentAxis, diff.x + diff.y + diff.z ) ;//mRotations2.x, mRotations2.y, mRotations2.z );
-                   // mRotations.normalize();
+                    mRotations *= Quatf( currentAxis, diff.x + diff.y + diff.z ) ;
                 }
                 else if( mCurrentMode == SCALE ){
                     mScale += diff * 0.01f;
@@ -219,6 +231,7 @@ namespace cinder {
                 transform();
             }
             
+            // Keep the last mouse position
             mMousePos = intersection;
         }
         
@@ -229,11 +242,6 @@ namespace cinder {
     
     Gizmo::Gizmo(){
     }
-    
-    void Gizmo::generateModels(){
-        
-    }
-    
     
     void Gizmo::drawTranslate( ColorA xColor, ColorA yColor, ColorA zColor ) {
         float axisLength = 30.0f;
@@ -256,18 +264,15 @@ namespace cinder {
         glCullFace( GL_BACK );
         
         gl::color( yColor );
-        //gl::drawVector( Vec3f::zero(), Vec3f::xAxis() * axisLength, headLength, headRadius );
         gl::drawCylinder( axisLength, axisLength, radius, slices );
         
         gl::color( xColor );
-        //gl::drawVector( Vec3f::zero(), Vec3f::yAxis() * axisLength, headLength, headRadius );
         gl::pushModelView();
         gl::rotate( Vec3f::zAxis() * 90 );
         gl::drawCylinder( axisLength, axisLength, radius, slices );
         gl::popModelView();
         
         gl::color( zColor );
-        //gl::drawVector( Vec3f::zero(), Vec3f::zAxis() * axisLength, headLength, headRadius );
         gl::pushModelView();
         gl::rotate( Vec3f::xAxis() * 90 );
         gl::drawCylinder( axisLength, axisLength, radius, slices );
@@ -297,7 +302,6 @@ namespace cinder {
         y  = mPositionFbo.getHeight() - y;
         
         // Copy Cursor Neighbors to the cursor Fbo
-        //-----------------------------------------------------------
         
         mPositionFbo.blitTo( mCursorFbo, Area( x-5, y-5, x+5, y+5), mCursorFbo.getBounds());
         
@@ -311,7 +315,6 @@ namespace cinder {
         
         
         // Sample the area and count the occurences of red, green and blue
-        //-----------------------------------------------------------
         
         unsigned int total  = (mCursorFbo.getWidth() * mCursorFbo.getHeight());
         unsigned int color, reds = 0, greens = 0, blues = 0;
@@ -328,7 +331,7 @@ namespace cinder {
         }
         
         // Return the selected axis
-        //-----------------------------------------------------------
+        
         int axis = -1;
         if( reds + greens + blues > 0 ) {
             axis = ( reds > blues && reds > greens ) ? 0 : ( greens > blues && greens > reds ) ? 1 : 2;

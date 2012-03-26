@@ -61,15 +61,11 @@ namespace cinder {
         bool mouseMove( app::MouseEvent event );
         bool mouseDrag( app::MouseEvent event );
         
-        //gl::Fbo& getFbo(){ return mPositionFbo; }
-        
         
     protected:
         
         Gizmo();
-        
-        void generateModels();
-        
+                
         void drawTranslate( ColorA xColor = RED, ColorA yColor = GREEN, ColorA zColor = BLUE ) ;
         void drawRotate( ColorA xColor = RED, ColorA yColor = GREEN, ColorA zColor = BLUE );
         void drawScale( ColorA xColor = RED, ColorA yColor = GREEN, ColorA zColor = BLUE );
@@ -85,11 +81,9 @@ namespace cinder {
         
         static ColorA RED, GREEN, BLUE, YELLOW;
         
-        //loadModels VS generateModels
         
         gl::Fbo     mPositionFbo;
         gl::Fbo     mCursorFbo;
-        //gl::VboMesh mMeshes[3];
         
         Vec3f       mPosition;
         Quatf       mRotations;

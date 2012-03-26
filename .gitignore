@@ -15,3 +15,7 @@ build/
 *.sdf
 Debug/
 Release/
+
+sample/GizmoSample/xcode/GizmoSample.xcodeproj/project.xcworkspace/xcuserdata/simongeilfus.xcuserdatad/UserInterfaceState.xcuserstate
+
+sample/GizmoSample/xcode/GizmoSample.xcodeproj/xcuserdata/simongeilfus.xcuserdatad/xcschemes/GizmoSample.xcscheme

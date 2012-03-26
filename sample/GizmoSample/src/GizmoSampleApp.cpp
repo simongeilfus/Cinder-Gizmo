@@ -61,10 +61,12 @@ void GizmoSampleApp::draw()
     gl::enableDepthWrite();
     
     // Draw GizmoUI
+    
     mGizmo->draw();
     
     
     // Move and draw a cube with it
+    
     gl::pushModelView();
     gl::multModelView( mGizmo->getTransform() );
     gl::color( 1.0f, 1.0f, 1.0f );
@@ -73,8 +75,7 @@ void GizmoSampleApp::draw()
     
     
     // Draw XZ Plane
-    gl::color( 0.0f, 0.0f, 1.0f );
-    
+
     float cellSize = 50.0f;
     gl::color( 0.1f, 0.1f, 0.1f );
     gl::enableWireframe();

@@ -38,6 +38,7 @@ namespace cinder {
         mModelView  = cam.getModelViewMatrix();
         
         // Render Gizmo to the position Fbo
+        //-----------------------------------------------------------
         mPositionFbo.bindFramebuffer();
         
         gl::setMatricesWindowPersp( mPositionFbo.getSize() );
@@ -57,16 +58,17 @@ namespace cinder {
         gl::enableDepthRead();
         gl::enableDepthWrite();
         
-        // Scale the graphics according to the camera distance so they say at the same size
         float scale = ( mTransform.getTranslate() - mCurrentCam.getEyePoint() ).length() / 200.0f;
+        gl::pushMatrices();
         gl::scale( scale, scale, scale );
 
-        // Render the right gizmo
         switch( mCurrentMode ){
             case TRANSLATE: drawTranslate(); break;
             case ROTATE: drawRotate(); break;
             case SCALE: drawScale(); break;
         }
+        
+        gl::popMatrices();
         
         gl::disableDepthRead();
         gl::disableDepthWrite();
@@ -79,11 +81,8 @@ namespace cinder {
         gl::pushModelView();
         gl::multModelView( mUnscaledTransform );
         
-        // Scale the graphics according to the camera distance so they say at the same size
         float scale = ( mTransform.getTranslate() - mCurrentCam.getEyePoint() ).length() / 200.0f;
         gl::scale( scale, scale, scale );
-        
-        // Render the right gizmo and highlight the selected axis
         switch( mCurrentMode ){
             case TRANSLATE: 
                 switch( mSelectedAxis ){
@@ -207,8 +206,8 @@ namespace cinder {
                 else if( mCurrentMode == ROTATE ){
                     diff *= 0.005f;
                     //float save = diff.x;
-                    //diff.x = -diff.x;
-                    //diff.y = -diff.y;
+                    diff.x = -diff.x;
+                    diff.y = -diff.y;
                     //mRotations2 += diff;//Quatf( mRotations.getPitch() + diff.x, mRotations.getYaw() + diff.y, mRotations.getRoll() + diff.z );
                     mRotations *= Quatf( currentAxis, diff.x + diff.y + diff.z ) ;//mRotations2.x, mRotations2.y, mRotations2.z );
                    // mRotations.normalize();
@@ -257,15 +256,18 @@ namespace cinder {
         glCullFace( GL_BACK );
         
         gl::color( yColor );
+        //gl::drawVector( Vec3f::zero(), Vec3f::xAxis() * axisLength, headLength, headRadius );
         gl::drawCylinder( axisLength, axisLength, radius, slices );
         
         gl::color( xColor );
+        //gl::drawVector( Vec3f::zero(), Vec3f::yAxis() * axisLength, headLength, headRadius );
         gl::pushModelView();
         gl::rotate( Vec3f::zAxis() * 90 );
         gl::drawCylinder( axisLength, axisLength, radius, slices );
         gl::popModelView();
         
         gl::color( zColor );
+        //gl::drawVector( Vec3f::zero(), Vec3f::zAxis() * axisLength, headLength, headRadius );
         gl::pushModelView();
         gl::rotate( Vec3f::xAxis() * 90 );
         gl::drawCylinder( axisLength, axisLength, radius, slices );
@@ -295,6 +297,7 @@ namespace cinder {
         y  = mPositionFbo.getHeight() - y;
         
         // Copy Cursor Neighbors to the cursor Fbo
+        //-----------------------------------------------------------
         
         mPositionFbo.blitTo( mCursorFbo, Area( x-5, y-5, x+5, y+5), mCursorFbo.getBounds());
         
@@ -308,6 +311,7 @@ namespace cinder {
         
         
         // Sample the area and count the occurences of red, green and blue
+        //-----------------------------------------------------------
         
         unsigned int total  = (mCursorFbo.getWidth() * mCursorFbo.getHeight());
         unsigned int color, reds = 0, greens = 0, blues = 0;
@@ -324,6 +328,7 @@ namespace cinder {
         }
         
         // Return the selected axis
+        //-----------------------------------------------------------
         int axis = -1;
         if( reds + greens + blues > 0 ) {
             axis = ( reds > blues && reds > greens ) ? 0 : ( greens > blues && greens > reds ) ? 1 : 2;

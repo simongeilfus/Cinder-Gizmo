@@ -1,5 +1,12 @@
 // !$*UTF8*$!
 {
+	00BAE6590E7ED9C10018A608 /* GizmoSampleApp.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1411, 1404}}";
+			sepNavSelRange = "{88, 0}";
+			sepNavVisRange = "{1260, 1624}";
+		};
+	};
 	29B97313FDCFA39411CA2CEA /* Project object */ = {
 		activeBuildConfigurationName = Debug;
 		activeExecutable = 4BA21652151FCA7300E14885 /* GizmoSample */;
@@ -14,7 +21,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					341,
+					1233,
 					20,
 					48,
 					43,
@@ -31,12 +38,72 @@
 					PBXFileDataSource_Target_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 354426558;
-			PBXWorkspaceStateSaveDate = 354426558;
+			PBXPerProjectTemplateStateSaveDate = 354571553;
+			PBXWorkspaceStateSaveDate = 354571553;
+		};
+		perUserProjectItems = {
+			4B3629C615225FA700B553CA /* PBXTextBookmark */ = 4B3629C615225FA700B553CA /* PBXTextBookmark */;
+			4B3629C715225FA700B553CA /* PBXTextBookmark */ = 4B3629C715225FA700B553CA /* PBXTextBookmark */;
+			4B3629C815225FA700B553CA /* PBXTextBookmark */ = 4B3629C815225FA700B553CA /* PBXTextBookmark */;
+			4B3629C915225FA700B553CA /* PBXTextBookmark */ = 4B3629C915225FA700B553CA /* PBXTextBookmark */;
 		};
 		sourceControlManager = 4BA21677151FCA7800E14885 /* Source Control */;
 		userBuildSettings = {
 		};
+	};
+	4B089D671521241700BB1AC4 /* Gizmo.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1636, 5083}}";
+			sepNavSelRange = "{5420, 16}";
+			sepNavVisRange = "{5084, 2350}";
+		};
+	};
+	4B089D681521241700BB1AC4 /* Gizmo.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1411, 1417}}";
+			sepNavSelRange = "{1276, 0}";
+			sepNavVisRange = "{1381, 1399}";
+		};
+	};
+	4B3629C615225FA700B553CA /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4B089D681521241700BB1AC4 /* Gizmo.h */;
+		name = "Gizmo.h: 51";
+		rLen = 0;
+		rLoc = 1276;
+		rType = 0;
+		vrLen = 1399;
+		vrLoc = 1381;
+	};
+	4B3629C715225FA700B553CA /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4B089D671521241700BB1AC4 /* Gizmo.cpp */;
+		name = "Gizmo.cpp: 178";
+		rLen = 16;
+		rLoc = 5420;
+		rType = 0;
+		vrLen = 2350;
+		vrLoc = 5084;
+	};
+	4B3629C815225FA700B553CA /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 00BAE6590E7ED9C10018A608 /* GizmoSampleApp.cpp */;
+		name = "GizmoSampleApp.cpp: 3";
+		rLen = 0;
+		rLoc = 88;
+		rType = 0;
+		vrLen = 1624;
+		vrLoc = 1260;
+	};
+	4B3629C915225FA700B553CA /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 00BAE6590E7ED9C10018A608 /* GizmoSampleApp.cpp */;
+		name = "GizmoSampleApp.cpp: 3";
+		rLen = 0;
+		rLoc = 88;
+		rType = 0;
+		vrLen = 1624;
+		vrLoc = 1260;
 	};
 	4BA21652151FCA7300E14885 /* GizmoSample */ = {
 		isa = PBXExecutable;

@@ -22,14 +22,12 @@
 #include "cinder/Arcball.h"
 
 
-
-
 typedef std::shared_ptr< class Gizmo > GizmoRef;
 
 class Gizmo {
 public:
     
-    static GizmoRef Create( ci::Vec2i viewportSize );
+    static GizmoRef create( ci::Vec2i viewportSize, bool autoRegisterEvents = true, float gizmoScale = 1.0f, float samplingDefinition = 0.5f );
     
     enum {
         TRANSLATE,
@@ -47,9 +45,9 @@ public:
     void setTransform( ci::Vec3f position, ci::Quatf rotations, ci::Vec3f scale );
     void setTransform( ci::Matrix44f m );
     
-    ci::Vec3f       getTranslate(){ return mPosition; }
-    ci::Quatf       getRotate(){ return mRotations; }
-    ci::Vec3f       getScale(){ return mScale; }
+    ci::Vec3f       getTranslate();
+    ci::Quatf       getRotate();
+    ci::Vec3f       getScale();
     ci::Matrix44f   getTransform();
     
     void setMode( int mode );
@@ -58,10 +56,8 @@ public:
     void unregisterEvents();
     
     bool mouseDown( ci::app::MouseEvent event );
-    bool mouseUp( ci::app::MouseEvent event );
     bool mouseMove( ci::app::MouseEvent event );
     bool mouseDrag( ci::app::MouseEvent event );
-    
     
 protected:
     
@@ -104,6 +100,8 @@ protected:
     int             mCurrentMode;
     int             mSelectedAxis;
     ci::Vec3f       mMousePos;
+	
+	float			mSize;
     
     std::vector< ci::CallbackId >	mCallbackIds;
     

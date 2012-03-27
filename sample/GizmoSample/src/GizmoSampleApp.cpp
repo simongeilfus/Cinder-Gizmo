@@ -1,14 +1,6 @@
 #include "cinder/app/AppBasic.h"
 #include "cinder/gl/gl.h"
-
-#include "cinder/gl/Vbo.h"
-
-#include "cinder/Camera.h"
 #include "cinder/MayaCamUI.h"
-#include "cinder/Utilities.h"
-#include "cinder/Filesystem.h"
-#include "cinder/Plane.h"
-
 
 #include "Gizmo.h"
 
@@ -33,9 +25,7 @@ class GizmoSampleApp : public AppBasic {
 void GizmoSampleApp::setup()
 {
     // Create a reference to our gizmo object 
-    mGizmo = Gizmo::Create( getWindowSize() );
-    mGizmo->registerEvents();
-    
+    mGizmo = Gizmo::create( getWindowSize() );    
     
     // Create the cam interface
     CameraPersp cam;

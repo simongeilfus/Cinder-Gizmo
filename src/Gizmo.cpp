@@ -10,7 +10,7 @@
 
 
 
-GizmoRef Gizmo::Create( ci::Vec2i viewportSize ){
+GizmoRef Gizmo::create( ci::Vec2i viewportSize, bool autoRegisterEvents, float gizmoScale, float samplingDefinition ){
     GizmoRef gizmo              = GizmoRef( new Gizmo() );
     gizmo->mCurrentMode         = TRANSLATE;
     gizmo->mWindowSize          = ci::Rectf( 0, 0, viewportSize.x, viewportSize.y );;
@@ -20,14 +20,17 @@ GizmoRef Gizmo::Create( ci::Vec2i viewportSize ){
     format.setColorInternalFormat( GL_RGBA );
     format.setSamples( 0 );
     
-    gizmo->mPositionFbo         = ci::gl::Fbo( viewportSize.x / 2.0f, viewportSize.y / 2.0f, format );
-    gizmo->mCursorFbo           = ci::gl::Fbo( 10, 10, format );
+    gizmo->mPositionFbo         = ci::gl::Fbo( viewportSize.x * samplingDefinition, viewportSize.y * samplingDefinition, format );
+    gizmo->mCursorFbo           = ci::gl::Fbo( 5, 5, format );
     gizmo->mSelectedAxis        = -1;
     gizmo->mPosition            = ci::Vec3f( 0.0f, 0.0f, 0.0f );
     gizmo->mRotations           = ci::Quatf();
     gizmo->mScale               = ci::Vec3f( 1.0f, 1.0f, 1.0f );
     gizmo->mArcball             = ci::Arcball( viewportSize );
+	gizmo->mSize				= gizmoScale;
     
+	if( autoRegisterEvents ) gizmo->registerEvents();
+	
     return gizmo;
 }
 
@@ -38,20 +41,15 @@ void Gizmo::setMatrices( ci::CameraPersp cam ){
     mProjection = cam.getProjectionMatrix();
     mModelView  = cam.getModelViewMatrix();
     
-    // Render Gizmo to the position Fbo
+    // Render Gizmo positions to the Fbo
     mPositionFbo.bindFramebuffer();
     
     ci::gl::setMatricesWindowPersp( mPositionFbo.getSize() );
-    
-    glMatrixMode( GL_PROJECTION );
-    glLoadMatrixf( mProjection.m );
+	ci::gl::setMatrices( cam );
     
     ci::gl::clear( ci::ColorA( 0.0f, 0.0f, 0.0f, 0.0f ) );
     
     ci::gl::pushModelView();
-    
-    glMatrixMode( GL_MODELVIEW );
-    glLoadMatrixf( mModelView.m );
     
     // Mult by the unscaled matrix so we don't get non-uniform scales on our graphics
     ci::gl::multModelView( mUnscaledTransform );
@@ -60,15 +58,19 @@ void Gizmo::setMatrices( ci::CameraPersp cam ){
     ci::gl::enableDepthWrite();
     
     // Scale the graphics so they look always the same size on the screen
-    float scale = ( mTransform.getTranslate() - mCurrentCam.getEyePoint() ).length() / 200.0f;
+    float scale = mSize * ( mTransform.getTranslate() - mCurrentCam.getEyePoint() ).length() / 200.0f;
     ci::gl::scale( scale, scale, scale );
     
+	glLineWidth( 3.0f );
+	
     // Draw Gizmo graphics
     switch( mCurrentMode ){
         case TRANSLATE: drawTranslate(); break;
         case ROTATE: drawRotate(); break;
         case SCALE: drawScale(); break;
     }
+	
+	glLineWidth( 1.0f );
     
     ci::gl::disableDepthRead();
     ci::gl::disableDepthWrite();
@@ -84,7 +86,7 @@ void Gizmo::draw(){
     ci::gl::multModelView( mUnscaledTransform );
     
     // Scale the graphics so they look always the same size on the screen
-    float scale = ( mTransform.getTranslate() - mCurrentCam.getEyePoint() ).length() / 200.0f;
+    float scale = mSize * ( mTransform.getTranslate() - mCurrentCam.getEyePoint() ).length() / 200.0f;
     ci::gl::scale( scale, scale, scale );
     
     // Draw Gizmo graphics and highlight selected axis
@@ -114,7 +116,6 @@ void Gizmo::draw(){
             break;
     }
     
-    ci::gl::drawCoordinateFrame();
     ci::gl::popModelView();
 }
 
@@ -122,13 +123,26 @@ void Gizmo::transform(){
     // Create the transformation matrix, I guess some of the rotations problem are here
     // WRONG ?
     mTransform.setToIdentity();
-    // mTransform.translate( ci::Vec3f::zero() );
-    //mTransform *= mRotations;
-    //mTransform.translate( mPosition );
-    mTransform *= ci::Matrix44f::createTranslation( mPosition ) * mRotations.toMatrix44();
+	mTransform.translate( mPosition );
+    mTransform *= mRotations;
     mUnscaledTransform = mTransform;
     mTransform.scale( mScale );
 }
+
+void Gizmo::setTranslate( ci::Vec3f v ){ 
+	mPosition = v; 
+    transform();
+}
+void Gizmo::setRotate( ci::Quatf q ){ 
+	mRotations = q; 
+    transform();
+}
+void Gizmo::setScale( ci::Vec3f v ){ 
+	mScale = v; 
+    transform();
+}
+
+
 void Gizmo::setTransform( ci::Vec3f position, ci::Quatf rotations, ci::Vec3f scale ){
     mPosition   = position;
     mRotations  = rotations;
@@ -137,6 +151,16 @@ void Gizmo::setTransform( ci::Vec3f position, ci::Quatf rotations, ci::Vec3f sca
 }
 void Gizmo::setTransform( ci::Matrix44f m ){
     mTransform = m;
+}
+
+ci::Vec3f Gizmo::getTranslate(){ 
+	return mPosition; 
+}
+ci::Quatf Gizmo::getRotate(){ 
+	return mRotations; 
+}
+ci::Vec3f Gizmo::getScale(){ 
+	return mScale; 
 }
 ci::Matrix44f Gizmo::getTransform(){
     return mTransform;
@@ -148,16 +172,14 @@ void Gizmo::setMode( int mode ){
 
 void Gizmo::registerEvents(){
     mCallbackIds.push_back( ci::app::App::get()->registerMouseDown( this, &Gizmo::mouseDown ) );
-    mCallbackIds.push_back( ci::app::App::get()->registerMouseUp( this, &Gizmo::mouseUp ) );
     mCallbackIds.push_back( ci::app::App::get()->registerMouseMove( this, &Gizmo::mouseMove ) );
     mCallbackIds.push_back( ci::app::App::get()->registerMouseDrag( this, &Gizmo::mouseDrag ) );
 }
 void Gizmo::unregisterEvents(){
     if( mCallbackIds.size() ){
         ci::app::App::get()->unregisterMouseDown(	mCallbackIds[ 0 ] );
-        ci::app::App::get()->unregisterMouseUp(     mCallbackIds[ 1 ] );
-        ci::app::App::get()->unregisterMouseMove(	mCallbackIds[ 2 ] );
-        ci::app::App::get()->unregisterMouseDrag(	mCallbackIds[ 3 ] );
+        ci::app::App::get()->unregisterMouseMove(	mCallbackIds[ 1 ] );
+        ci::app::App::get()->unregisterMouseDrag(	mCallbackIds[ 2 ] );
     }
 }
 
@@ -201,9 +223,6 @@ bool Gizmo::mouseDown( ci::app::MouseEvent event ){
     }
     
     
-    return false;
-}
-bool Gizmo::mouseUp( ci::app::MouseEvent event ){
     return false;
 }
 bool Gizmo::mouseMove( ci::app::MouseEvent event ){

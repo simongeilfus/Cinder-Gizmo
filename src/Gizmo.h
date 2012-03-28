@@ -78,7 +78,7 @@ protected:
     };
     
     void transform();
-    inline void decompose ( ci::Matrix44f matrix, ci::Vec3f& scaling, ci::Quatf& rotation, ci::Vec3f& position);
+    void decompose();
     
     
     static ci::ColorA RED, GREEN, BLUE, YELLOW;

@@ -150,7 +150,7 @@ void Gizmo::setTransform( ci::Vec3f position, ci::Quatf rotations, ci::Vec3f sca
 }
 void Gizmo::setTransform( ci::Matrix44f m ){
     mTransform = m;
-    decompose( mTransform, mScale, mRotations, mPosition );
+    decompose();
 }
 
 ci::Vec3f Gizmo::getTranslate(){ 
@@ -166,39 +166,37 @@ ci::Matrix44f Gizmo::getTransform(){
     return mTransform;
 }
 
-inline void Gizmo::decompose ( ci::Matrix44f matrix, ci::Vec3f& scaling, ci::Quatf& rotation,
-                       ci::Vec3f& position)
-{
+void Gizmo::decompose (){
     // extract translation
-    position.x = matrix.at(0, 3);
-    position.y = matrix.at(1, 3);
-    position.z = matrix.at(2, 3);
+    mPosition.x = mTransform.at(0, 3);
+    mPosition.y = mTransform.at(1, 3);
+    mPosition.z = mTransform.at(2, 3);
     
     // extract the rows of the matrix
     
     ci::Vec3f columns[3] = {
-        matrix.getColumn(0).xyz(),
-        matrix.getColumn(1).xyz(),
-        matrix.getColumn(2).xyz()
+        mTransform.getColumn(0).xyz(),
+        mTransform.getColumn(1).xyz(),
+        mTransform.getColumn(2).xyz()
     };
     
     // extract the scaling factors
-    scaling.x = columns[0].length();
-    scaling.y = columns[1].length();
-    scaling.z = columns[2].length();
+    mScale.x = columns[0].length();
+    mScale.y = columns[1].length();
+    mScale.z = columns[2].length();
     
     // and remove all scaling from the matrix
-    if(scaling.x)
+    if(mScale.x)
     {
-        columns[0] /= scaling.x;
+        columns[0] /= mScale.x;
     }
-    if(scaling.y)
+    if(mScale.y)
     {
-        columns[1] /= scaling.y;
+        columns[1] /= mScale.y;
     }
-    if(scaling.z)
+    if(mScale.z)
     {
-        columns[2] /= scaling.z;
+        columns[2] /= mScale.z;
     }
     
     // build a 3x3 rotation matrix
@@ -207,7 +205,7 @@ inline void Gizmo::decompose ( ci::Matrix44f matrix, ci::Vec3f& scaling, ci::Qua
                 columns[0].z,columns[1].z,columns[2].z, true);
     
     // and generate the rotation quaternion from it
-    rotation = ci::Quatf(m);
+    mRotations = ci::Quatf(m);
 }
 
 void Gizmo::setMode( int mode ){

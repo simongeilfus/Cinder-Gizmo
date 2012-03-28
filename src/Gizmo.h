@@ -4,9 +4,12 @@
 //
 //  Created by Simon Geilfus on 22/03/12.
 //
-//  fbo.blitTo trick, charToInt and area color sampling taken from 
+//  Fbo.blitTo trick, charToInt and area color sampling taken from 
 //  Paul Houx 3D picking sample  :
 //  http://forum.libcinder.org/topic/fast-object-picking-using-multiple-render-targets
+//
+//  Decompose matrix method from Assimp library:
+//  http://assimp.sourceforge.net/
 //
 
 #pragma once
@@ -58,6 +61,7 @@ public:
     bool mouseDown( ci::app::MouseEvent event );
     bool mouseMove( ci::app::MouseEvent event );
     bool mouseDrag( ci::app::MouseEvent event );
+    bool resize( ci::app::ResizeEvent event );
     
 protected:
     
@@ -74,6 +78,7 @@ protected:
     };
     
     void transform();
+    inline void decompose ( ci::Matrix44f matrix, ci::Vec3f& scaling, ci::Quatf& rotation, ci::Vec3f& position);
     
     
     static ci::ColorA RED, GREEN, BLUE, YELLOW;
@@ -102,6 +107,8 @@ protected:
     ci::Vec3f       mMousePos;
 	
 	float			mSize;
+    
+    bool            mCanRotate;
     
     std::vector< ci::CallbackId >	mCallbackIds;
     

@@ -13,7 +13,7 @@
 GizmoRef Gizmo::create( ci::Vec2i viewportSize, bool autoRegisterEvents, float gizmoScale, float samplingDefinition ){
     GizmoRef gizmo              = GizmoRef( new Gizmo() );
     gizmo->mCurrentMode         = TRANSLATE;
-    gizmo->mWindowSize          = ci::Rectf( 0, 0, viewportSize.x, viewportSize.y );;
+    gizmo->mWindowSize          = ci::Rectf( 0, 0, viewportSize.x, viewportSize.y );
     
     ci::gl::Fbo::Format format;
     format.enableColorBuffer();
@@ -121,7 +121,6 @@ void Gizmo::draw(){
 
 void Gizmo::transform(){
     // Create the transformation matrix, I guess some of the rotations problem are here
-    // WRONG ?
     mTransform.setToIdentity();
 	mTransform.translate( mPosition );
     mTransform *= mRotations;
@@ -151,6 +150,7 @@ void Gizmo::setTransform( ci::Vec3f position, ci::Quatf rotations, ci::Vec3f sca
 }
 void Gizmo::setTransform( ci::Matrix44f m ){
     mTransform = m;
+    decompose( mTransform, mScale, mRotations, mPosition );
 }
 
 ci::Vec3f Gizmo::getTranslate(){ 
@@ -165,6 +165,51 @@ ci::Vec3f Gizmo::getScale(){
 ci::Matrix44f Gizmo::getTransform(){
     return mTransform;
 }
+
+inline void Gizmo::decompose ( ci::Matrix44f matrix, ci::Vec3f& scaling, ci::Quatf& rotation,
+                       ci::Vec3f& position)
+{
+    // extract translation
+    position.x = matrix.at(0, 3);
+    position.y = matrix.at(1, 3);
+    position.z = matrix.at(2, 3);
+    
+    // extract the rows of the matrix
+    
+    ci::Vec3f columns[3] = {
+        matrix.getColumn(0).xyz(),
+        matrix.getColumn(1).xyz(),
+        matrix.getColumn(2).xyz()
+    };
+    
+    // extract the scaling factors
+    scaling.x = columns[0].length();
+    scaling.y = columns[1].length();
+    scaling.z = columns[2].length();
+    
+    // and remove all scaling from the matrix
+    if(scaling.x)
+    {
+        columns[0] /= scaling.x;
+    }
+    if(scaling.y)
+    {
+        columns[1] /= scaling.y;
+    }
+    if(scaling.z)
+    {
+        columns[2] /= scaling.z;
+    }
+    
+    // build a 3x3 rotation matrix
+    ci::Matrix33f m(columns[0].x,columns[1].x,columns[2].x,
+                columns[0].y,columns[1].y,columns[2].y,
+                columns[0].z,columns[1].z,columns[2].z, true);
+    
+    // and generate the rotation quaternion from it
+    rotation = ci::Quatf(m);
+}
+
 void Gizmo::setMode( int mode ){
     mCurrentMode = mode;
 }
@@ -174,12 +219,14 @@ void Gizmo::registerEvents(){
     mCallbackIds.push_back( ci::app::App::get()->registerMouseDown( this, &Gizmo::mouseDown ) );
     mCallbackIds.push_back( ci::app::App::get()->registerMouseMove( this, &Gizmo::mouseMove ) );
     mCallbackIds.push_back( ci::app::App::get()->registerMouseDrag( this, &Gizmo::mouseDrag ) );
+    mCallbackIds.push_back( ci::app::App::get()->registerResize( this, &Gizmo::resize ) );
 }
 void Gizmo::unregisterEvents(){
     if( mCallbackIds.size() ){
         ci::app::App::get()->unregisterMouseDown(	mCallbackIds[ 0 ] );
         ci::app::App::get()->unregisterMouseMove(	mCallbackIds[ 1 ] );
         ci::app::App::get()->unregisterMouseDrag(	mCallbackIds[ 2 ] );
+        ci::app::App::get()->unregisterResize(      mCallbackIds[ 3 ] );
     }
 }
 
@@ -227,13 +274,21 @@ bool Gizmo::mouseDown( ci::app::MouseEvent event ){
 }
 bool Gizmo::mouseMove( ci::app::MouseEvent event ){
     mSelectedAxis = samplePosition( (float) event.getPos().x / (float) ci::app::getWindowWidth() * (float) mPositionFbo.getWidth(), (float) event.getPos().y  / (float) ci::app::getWindowHeight() * (float) mPositionFbo.getHeight() );
+    
+    mCanRotate = false;
+    if( mSelectedAxis == -1 && mCurrentMode == ROTATE ){
+        // Check if inside rotation center
+        if( ( event.getPos() - mCurrentCam.worldToScreen( mPosition, mWindowSize.getWidth(), mWindowSize.getHeight() ) ).length() < 100.0f ){
+            mCanRotate = true;
+        }
+    }
     return false;
 }
 
 bool Gizmo::mouseDrag( ci::app::MouseEvent event ){           
     
     // If rotating use Arcball instead of the raycasting trick
-    if( mCurrentMode == ROTATE ){
+    if( mCurrentMode == ROTATE && mCanRotate ){
         mArcball.mouseDrag( event.getPos() );
         mRotations = mArcball.getQuat();
         transform();
@@ -255,7 +310,9 @@ bool Gizmo::mouseDrag( ci::app::MouseEvent event ){
         // Cast a ray from the camera
         float intersectionDistance;
         ci::Ray ray = mCurrentCam.generateRay( event.getPos().x / (float) mWindowSize.getWidth(), 1.0f - event.getPos().y / (float) mWindowSize.getHeight(), mWindowSize.getWidth() / (float) mWindowSize.getHeight() );
-        bool intersect = ray.calcPlaneIntersection( currentPlane.getPoint(), currentPlane.getNormal(), &intersectionDistance );
+        
+        // Transform the plane point and normal so it relfects our rotations
+        bool intersect = ray.calcPlaneIntersection( mPosition + mRotations.toMatrix33() * currentPlane.getPoint(), mRotations.toMatrix33() * currentPlane.getNormal(), &intersectionDistance );
         
         // And check if there's an intersection with the plane
         if( intersect ){
@@ -267,7 +324,8 @@ bool Gizmo::mouseDrag( ci::app::MouseEvent event ){
                 diff *= currentAxis;
                 
                 if( mCurrentMode == TRANSLATE ){   
-                    mPosition += diff;
+                    // Transform the translation to match the current rotations
+                    mPosition += mRotations.toMatrix33() * diff;
                 }
                 else if( mCurrentMode == SCALE ){
                     mScale += diff * 0.01f;
@@ -284,6 +342,10 @@ bool Gizmo::mouseDrag( ci::app::MouseEvent event ){
     return false;  
 }
 
+bool Gizmo::resize( ci::app::ResizeEvent event ){
+    mWindowSize = ci::Rectf( 0, 0, event.getSize().x, event.getSize().y );
+    return false;
+}
 
 Gizmo::Gizmo(){
 }
@@ -324,6 +386,12 @@ void Gizmo::drawRotate( ci::ColorA xColor, ci::ColorA yColor, ci::ColorA zColor 
     ci::gl::popModelView();
     
     glDisable( GL_CULL_FACE );
+    
+    ci::gl::pushMatrices();
+    ci::gl::color( 0.3f, 0.3f, 0.3f );
+    ci::gl::setMatricesWindow( ci::Vec2i( mWindowSize.getWidth(), mWindowSize.getHeight() ) );
+    ci::gl::drawStrokedCircle( mCurrentCam.worldToScreen( mPosition, mWindowSize.getWidth(), mWindowSize.getHeight() ), 100 );
+    ci::gl::popMatrices();
     
 }
 void Gizmo::drawScale( ci::ColorA xColor, ci::ColorA yColor, ci::ColorA zColor ){

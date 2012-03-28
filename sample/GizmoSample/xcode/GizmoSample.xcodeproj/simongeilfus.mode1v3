@@ -328,12 +328,12 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>4B3629C915225FA700B553CA</string>
+										<string>4B084DBA15228616000B4D7B</string>
 										<key>history</key>
 										<array>
 											<string>4B3629C615225FA700B553CA</string>
 											<string>4B3629C715225FA700B553CA</string>
-											<string>4B3629C815225FA700B553CA</string>
+											<string>4B3629C915225FA700B553CA</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -345,14 +345,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {1472, 706}}</string>
+								<string>{{0, 0}, {1472, 701}}</string>
 								<key>RubberWindowFrame</key>
 								<string>0 60 1680 968 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>706pt</string>
+							<string>701pt</string>
 						</dict>
 						<dict>
 							<key>ContentConfiguration</key>
@@ -365,14 +365,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 711}, {1472, 216}}</string>
+								<string>{{0, 706}, {1472, 221}}</string>
 								<key>RubberWindowFrame</key>
 								<string>0 60 1680 968 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
 							<key>Proportion</key>
-							<string>216pt</string>
+							<string>221pt</string>
 						</dict>
 					</array>
 					<key>Proportion</key>
@@ -391,9 +391,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>4B36291B1522553E00B553CA</string>
+				<string>4B084DBB15228616000B4D7B</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>4B36291C1522553E00B553CA</string>
+				<string>4B084DBC15228616000B4D7B</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -531,10 +531,6 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>4B3629261522553E00B553CA</string>
-		<string>4B3629271522553E00B553CA</string>
-		<string>1C78EAAD065D492600B07095</string>
-		<string>1CD10A99069EF8BA00B06720</string>
 		<string>4BA21675151FCA7800E14885</string>
 		<string>/Frameworks/Cinder/blocks/Gizmo/sample/GizmoSample/xcode/GizmoSample.xcodeproj</string>
 	</array>
@@ -616,7 +612,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>4BA21675151FCA7800E14885</string>
-				<string>4B36291D1522553E00B553CA</string>
+				<string>4B084DBD15228616000B4D7B</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>

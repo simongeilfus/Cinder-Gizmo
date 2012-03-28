@@ -38,18 +38,28 @@
 					PBXFileDataSource_Target_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 354571553;
-			PBXWorkspaceStateSaveDate = 354571553;
+			PBXPerProjectTemplateStateSaveDate = 354584084;
+			PBXWorkspaceStateSaveDate = 354584084;
 		};
 		perUserProjectItems = {
+			4B084DBA15228616000B4D7B /* PBXTextBookmark */ = 4B084DBA15228616000B4D7B /* PBXTextBookmark */;
 			4B3629C615225FA700B553CA /* PBXTextBookmark */ = 4B3629C615225FA700B553CA /* PBXTextBookmark */;
 			4B3629C715225FA700B553CA /* PBXTextBookmark */ = 4B3629C715225FA700B553CA /* PBXTextBookmark */;
-			4B3629C815225FA700B553CA /* PBXTextBookmark */ = 4B3629C815225FA700B553CA /* PBXTextBookmark */;
 			4B3629C915225FA700B553CA /* PBXTextBookmark */ = 4B3629C915225FA700B553CA /* PBXTextBookmark */;
 		};
 		sourceControlManager = 4BA21677151FCA7800E14885 /* Source Control */;
 		userBuildSettings = {
 		};
+	};
+	4B084DBA15228616000B4D7B /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 00BAE6590E7ED9C10018A608 /* GizmoSampleApp.cpp */;
+		name = "GizmoSampleApp.cpp: 3";
+		rLen = 0;
+		rLoc = 88;
+		rType = 0;
+		vrLen = 1624;
+		vrLoc = 1260;
 	};
 	4B089D671521241700BB1AC4 /* Gizmo.cpp */ = {
 		uiCtxt = {
@@ -84,16 +94,6 @@
 		rType = 0;
 		vrLen = 2350;
 		vrLoc = 5084;
-	};
-	4B3629C815225FA700B553CA /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 00BAE6590E7ED9C10018A608 /* GizmoSampleApp.cpp */;
-		name = "GizmoSampleApp.cpp: 3";
-		rLen = 0;
-		rLoc = 88;
-		rType = 0;
-		vrLen = 1624;
-		vrLoc = 1260;
 	};
 	4B3629C915225FA700B553CA /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;

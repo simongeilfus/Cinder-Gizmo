@@ -1,0 +1,28 @@
+Contents of /Frameworks/Cinder/blocks/Gizmo/sample/GizmoSample/xcode/GizmoSample_Prefix.pch
+3.1 (tags/Apple/clang-318.0.58) (based on LLVM 3.1svn)
+i386-apple-darwin11.3.0
+-x
+c++
+-arch
+i386
+-fmessage-length=0
+-fpascal-strings
+-O3
+-isysroot
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk
+-fasm-blocks
+-ffast-math
+-mmacosx-version-min=10.5
+-iquote
+-iquote
+-iquote../../../../../cinder_master/include
+-iquote../include
+-iquote../../../include
+-I/Frameworks/Cinder/blocks/Gizmo/sample/GizmoSample/xcode/build/Release/include
+-I../../../../../cinder_master/boost
+-F/Frameworks/Cinder/blocks/Gizmo/sample/GizmoSample/xcode/build/Release
+-ferror-limit=10
+-working-directory=/Frameworks/Cinder/blocks/Gizmo/sample/GizmoSample/xcode
+-Xclang
+-detailed-preprocessing-record
+SDK_PRODUCT_BUILD_VERSION=10K549

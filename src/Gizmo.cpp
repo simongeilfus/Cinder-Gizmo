@@ -274,7 +274,7 @@ bool Gizmo::mouseMove( ci::app::MouseEvent event ){
     mSelectedAxis = samplePosition( (float) event.getPos().x / (float) ci::app::getWindowWidth() * (float) mPositionFbo.getWidth(), (float) event.getPos().y  / (float) ci::app::getWindowHeight() * (float) mPositionFbo.getHeight() );
     
     mCanRotate = false;
-    if( mSelectedAxis == -1 && mCurrentMode == ROTATE ){
+    if( mSelectedAxis != -1 || ( mSelectedAxis == -1 && mCurrentMode == ROTATE ) ){
         // Check if inside rotation center
         if( ( event.getPos() - mCurrentCam.worldToScreen( mPosition, mWindowSize.getWidth(), mWindowSize.getHeight() ) ).length() < 100.0f ){
             mCanRotate = true;
@@ -323,7 +323,7 @@ bool Gizmo::mouseDrag( ci::app::MouseEvent event ){
                 
                 if( mCurrentMode == TRANSLATE ){   
                     // Transform the translation to match the current rotations
-                    mPosition += mRotations.toMatrix33() * diff;
+                    mPosition -= mRotations.toMatrix33() * diff;
                 }
                 else if( mCurrentMode == SCALE ){
                     mScale += diff * 0.01f;
